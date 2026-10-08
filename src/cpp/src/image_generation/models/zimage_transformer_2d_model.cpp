@@ -93,6 +93,8 @@ ZImageTransformer2DModel& ZImageTransformer2DModel::reshape(int batch_size,
     height /= m_vae_scale_factor;
     width /= m_vae_scale_factor;
 
+    const size_t image_seq_len = round_sequence_length((height / ZIMAGE_PATCH_SIZE) * (width / ZIMAGE_PATCH_SIZE));
+
     std::map<std::string, ov::PartialShape> name_to_shape;
 
     for (auto&& input : m_model->inputs()) {
@@ -114,7 +116,7 @@ ZImageTransformer2DModel& ZImageTransformer2DModel::reshape(int batch_size,
         } else if (input_name == "txt_ids") {
             name_to_shape[input_name] = {batch_size, tokenizer_model_max_length, 3};
         } else if (input_name == "img_ids") {
-            name_to_shape[input_name] = {batch_size, -1, 3};
+            name_to_shape[input_name] = {batch_size, image_seq_len, 3};
         }
     }
 
